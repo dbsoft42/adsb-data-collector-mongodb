@@ -125,4 +125,5 @@ async def main():
                 print(f'EXCEPTION!!!')
             await asyncio.sleep(config['source_poll_interval'])
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())
