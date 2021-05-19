@@ -36,16 +36,19 @@ async def process_dataset(db, dataset):
         old_status = deepcopy(messages[aircraft]['status'])
         # Fill/replace each attribute below
         for key, value in message.items():
-            # Set flag if flight ID is received for the first time
-            if (key == 'flight' and len(value) > 0
-                and (
-                        'flight' not in messages[aircraft]['status']
-                        or len(messages[aircraft]['status']['flight']) == 0
-                    )
-                ):
-                messages[aircraft]['first_flight_message'] = True
-            messages[message['hex']]['status'][key] = value
-            # In future consider skipping and unsetting zero/empty values
+            if key not in config['excluded_fields']:
+                if type(value) == str:
+                    value = value.strip()
+                # Set flag if flight ID is received for the first time
+                if (key == 'flight' and len(value) > 0
+                    and (
+                            'flight' not in messages[aircraft]['status']
+                            or len(messages[aircraft]['status']['flight']) == 0
+                        )
+                    ):
+                    messages[aircraft]['first_flight_message'] = True
+                messages[message['hex']]['status'][key] = value
+                # In future consider skipping and unsetting zero/empty values
         # Set the processed flag and time if status is changed from earlier
         if messages[aircraft]['status'] != old_status:
             messages[aircraft]['processed'] = False
@@ -56,7 +59,7 @@ async def process_dataset(db, dataset):
 async def process_message(db, message):
     '''Process given message into DB records as needed by calling required sub-functions'''
     if not message['processed']:
-        status = message['status'].copy()
+        status = deepcopy(message['status'])
         status['time'] = message['time']
         # Insert aircraft into DB if not already existing or update 'last seen'
         db_aircraft = await db.aircraft.find_one({'hex':status['hex']})
@@ -95,18 +98,17 @@ async def process_message(db, message):
         await db.status.insert_one(status)
         # If flight ID received for the first time
         if message['first_flight_message']:
-            # Update older status records (which don't have the flight ID yet)
-            db.status.update_many(  {
+            # Retroactively update older status records (which don't have the flight ID yet)
+            await db.status.update_many(  {
                                         'hex':status['hex'],
                                         'time':{'$gte':status['time']-relativedelta(seconds=config['orphan_status_update_max_age'])}
                                     },
                                     {'$set':{'flight':status['flight']}}
                                 )
-            # Add 'seen on' element to flight
-            db.flights.update_one({ 'flight':status['flight'], 'hex':status['hex']},
-                                    {'$addToSet':{'seen on':status['time']}})
             messages[status['hex']]['first_flight_message'] = False
         messages[status['hex']]['processed'] = True
+        # Debug timing messages
+        print(f'Status for {status["hex"]} from {status["time"].time()} submitted at {datetime.now().time()}')
 
 async def main():
     '''The driver function - will get the JSON from the URL and call process_dataset'''
@@ -120,9 +122,12 @@ async def main():
             try:
                 async with http_session.get(config['dump1090_url']) as response:
                     dataset = await response.json()
-                    await process_dataset(db, dataset)
-            except:
-                print(f'EXCEPTION!!!')
+            except Exception as exc:
+                print(f'EXCEPTION!')
+                print(exc)
+                await asyncio.sleep(config['source_poll_interval'])
+                continue
+            await process_dataset(db, dataset)
             await asyncio.sleep(config['source_poll_interval'])
 
 if __name__ == '__main__':

@@ -38,3 +38,9 @@ config['http_timeout'] = 3 # seconds
 config['cleanup_run_interval'] = 3600 # seconds
 # and how old the messages can be before they are removed.
 config['messages_max_age'] = 1800 # seconds
+
+# The following fields are excluded from the status documents.
+# This is primarily done to prevent new status documents from being created
+# when there is no change in the actual data but just change in the
+# age or cumulative fields. Add or remove fields here as per your preferences.
+config['excluded_fields'] = ['messages', 'seen', 'seen_pos',]
