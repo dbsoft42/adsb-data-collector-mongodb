@@ -16,9 +16,12 @@ async def cleanup():
     while True:
         now = datetime.now()
         cutoff_time = now - relativedelta(seconds=config['messages_max_age'])
-        for key, value in messages.items():
-            if value['time'] < cutoff_time:
-                del messages[key]
+        try:
+            for key, value in messages.items():
+                if value['time'] < cutoff_time:
+                    del messages[key]
+        except:
+            pass
         await asyncio.sleep(config['cleanup_run_interval'])
 
 async def process_dataset(db, dataset):
@@ -36,7 +39,7 @@ async def process_dataset(db, dataset):
         old_status = deepcopy(messages[aircraft]['status'])
         # Fill/replace each attribute below
         for key, value in message.items():
-            if key not in config['excluded_fields']:
+            if key not in config['excluded_fields'] and value != None:
                 if type(value) == str:
                     value = value.strip()
                 # Set flag if flight ID is received for the first time
@@ -94,8 +97,9 @@ async def process_message(db, message):
                                                         }
                                                 }
                                             )
-        # Create status record
-        await db.status.insert_one(status)
+        # Create status record if some basic location fields are available
+        if 'lat' in status or 'alt_baro' in status or 'alt_geom' in status:
+            await db.status.insert_one(status)
         # If flight ID received for the first time
         if message['first_flight_message']:
             # Retroactively update older status records (which don't have the flight ID yet)
@@ -108,7 +112,7 @@ async def process_message(db, message):
             messages[status['hex']]['first_flight_message'] = False
         messages[status['hex']]['processed'] = True
         # Debug timing messages
-        print(f'Status for {status["hex"]} from {status["time"].time()} submitted at {datetime.now().time()}')
+        #print(f'Status for {status["hex"]} from {status["time"].time()} submitted at {datetime.now().time()}')
 
 async def main():
     '''The driver function - will get the JSON from the URL and call process_dataset'''
@@ -116,8 +120,10 @@ async def main():
     mdb = AsyncIOMotorClient(config['db']['mongodb_conn_str'])
     db = mdb[config['db']['database_name']]
 
+    # Create a separate task for the cleanup function
+    asyncio.create_task(cleanup())
+
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=config['http_timeout'])) as http_session:
-        asyncio.create_task(cleanup())
         while True:
             try:
                 async with http_session.get(config['dump1090_url']) as response:
