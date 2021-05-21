@@ -5,12 +5,12 @@ adsb-data-collector-mongodb
 ### What does this do?
 This is mainly a single script that runs continuously and collects [ADS-B](https://en.wikipedia.org/wiki/Automatic_Dependent_Surveillance%E2%80%93Broadcast "What is ADS-B?") data from your dump1090 instance and stores it in organized MongoDB documents.
 
-* Works with *dump1090-fa* and should work with *dump1090-mutability* too, but it's not tested. Please drop me a line if it works for you.
+* Works with *[dump1090-fa](https://github.com/adsbxchange/dump1090-fa)* and should work with *[dump1090-mutability](https://github.com/adsbxchange/dump1090-mutability)* too, but it's not tested. Please drop me a line if it works for you.
 * Written solely in *Python*.
 * Uses Python asynchronous coroutines (through asyncio) to minimize delays from fetching and loading operations.
 
 ### Requirements
-* A configured and running **dump1090** instance. This can be yours or a friend's but you should be able to access it from wherever you intend to run this script, if the script is not running on the same machine as dump1090.
+* A configured and running **dump1090** instance (see links above). This can be yours or a friend's but you should be able to access it from wherever you intend to run this script, if the script is not running on the same machine as dump1090.
 * MongoDB - If you don't already have it, I recommend setting up a free cluster with [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 * Python 3.7+
 * Python libraries
