@@ -14,6 +14,7 @@ This is mainly a single script that runs continuously and collects [ADS-B](https
 * MongoDB - If you don't already have it, I recommend setting up a free cluster with [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 * Python 3.7+
 * Python libraries
+  * aiohttp
   * Motor: Asynchronous Python driver for MongoDB
   * Python-dateutil
   * dnspython
@@ -25,7 +26,7 @@ git clone https://github.com/dbsoft42/adsb-data-collector-mongodb.git
 ```
 Install the required Python libraries.
 ```
-pip3 install motor python-dateutil dnspython
+pip3 install aiohttp motor python-dateutil dnspython
 ```
 Copy the *config_template.py* file to *config.py*.
 ```
