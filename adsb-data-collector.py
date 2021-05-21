@@ -16,12 +16,12 @@ async def cleanup():
     while True:
         now = datetime.now()
         cutoff_time = now - relativedelta(seconds=config['messages_max_age'])
-        try:
-            for key, value in messages.items():
+        del_list = []
+        for key, value in messages.items():
                 if value['time'] < cutoff_time:
-                    del messages[key]
-        except:
-            pass
+                    del_list.append(key)
+        for key in del_list:
+            del messages[key]
         await asyncio.sleep(config['cleanup_run_interval'])
 
 async def process_dataset(db, dataset):
