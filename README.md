@@ -11,11 +11,12 @@ This is mainly a single script that runs continuously and collects [ADS-B](https
 
 ### Requirements
 * A configured and running **dump1090** instance. This can be yours or a friend's but you should be able to access it from wherever you intend to run this script, if the script is not running on the same machine as dump1090.
+* MongoDB - If you don't already have it, I recommend setting up a free cluster with [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 * Python 3.7+
 * Python libraries
-..* Motor: Asynchronous Python driver for MongoDB
-..* Python-dateutil
-..* dnspython
+  * Motor: Asynchronous Python driver for MongoDB
+  * Python-dateutil
+  * dnspython
 
 ### Installation and setup
 Download the files to the directory where you want to run it. I recommend having a dedicated directory/folder for this.
