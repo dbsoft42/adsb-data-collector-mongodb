@@ -48,5 +48,5 @@ Let it run for a few seconds (or longer if you wish). If all goes well, you shou
 
 To run it for the long term, I suggest running in in the background with nohup as shown below, but you can choose your own method. The script will basically run indefinitely once started.
 ```
-nohup adsb-data-collector.py &
+nohup python3 adsb-data-collector.py &
 ```
