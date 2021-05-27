@@ -16,6 +16,7 @@ This is mainly a single script that runs continuously and collects [ADS-B](https
 * Python libraries
   * aiohttp
   * Motor: Asynchronous Python driver for MongoDB
+  * PyMongo
   * Python-dateutil
   * dnspython
 
@@ -26,7 +27,7 @@ git clone https://github.com/dbsoft42/adsb-data-collector-mongodb.git
 ```
 Install the required Python libraries.
 ```
-pip3 install aiohttp motor python-dateutil dnspython
+pip3 install aiohttp motor pymongo python-dateutil dnspython
 ```
 Copy the *config_template.py* file to *config.py*.
 ```
@@ -37,7 +38,7 @@ Edit *config.py* in your favourite text editor and change the following paramete
 * `database_name` - The name of the database in MongoDB that you will use to store the ADS-B data. I recommend having a dedicated database for this not using it for any other data.
 * `dump1090_url` - This is the dump1090 URL which serves the *aircraft.json* file. Typically this will be in the form of `http://hostname/dump1090/data/aircraft.json` where *hostname* is the host name or IP address of the machine where *dump1090* is running. If you will be running this script on the same machine where dump1090 is running, you can leave it as *localhost*.
 
-The file has more parameters for fine-tuning various operations. You can leave these as the defaults or tune them if you need. The file has comments describing in more detail what each parameter is used for.
+The file has more parameters for fine-tuning various operations. You can leave these as the defaults or tune them if you like. The file has comments describing in more detail what each parameter is used for.
 
 Do a quick test run.
 ```

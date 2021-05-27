@@ -44,3 +44,31 @@ config['messages_max_age'] = 1800 # seconds
 # when there is no change in the actual data but just change in the
 # age or cumulative fields. Add or remove fields here as per your preferences.
 config['excluded_fields'] = ['messages', 'seen', 'seen_pos',]
+
+# The maximum number of consecutive errors that will be allowed for the
+# HTTP fetch process that get the data from dump1090.
+# The process will fail if consecutive errors exceed this threshold.
+# A successful operation will reset the counter.
+config['max_consecutive_http_errors'] = 10
+
+# Configure the following parameters for logging.
+# The process can write to log files in the directory speified below.
+# A new log file will be created at midnight every day and the old file will be
+# renamed with the date. The maximum number of old files that will be kept can
+# be specified below.
+# The log levels are the standard Python logging module levels. To log only errors,
+# set it to logging.ERROR (case sensitive).
+config['logging'] =     {
+                        # To enable, set to True (with capitlized T)
+                        'enabled':              False,
+                        # Directory/folder where log files will be created
+                        'log_dir':              '/home/adsb/logs',
+                        # Log file name
+                        'log_file_name':        'adsb_data_collector_mongodb.log',
+                        # Log level
+                        'log_level':            logging.INFO,
+                        # Log format
+                        'log_format':           '%(asctime)s - %(levelname)s - %(message)s',
+                        # Max number of old logs that will be kept
+                        'log_file_hist_count':  7
+                        }
