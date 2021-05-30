@@ -8,6 +8,8 @@ This is mainly a single script that runs continuously and collects [ADS-B](https
 * Works with *[dump1090-fa](https://github.com/adsbxchange/dump1090-fa)* and should work with *[dump1090-mutability](https://github.com/adsbxchange/dump1090-mutability)* too, but it's not tested. Please drop me a line if it works for you.
 * Written solely in *Python*.
 * Uses Python asynchronous coroutines (through asyncio) to minimize delays from fetching and loading operations.
+* Logging facility available
+* Ready for Pushover notifications in case of errors/failure.
 
 ### Requirements
 * A configured and running **dump1090** instance (see links above). This can be yours or a friend's but you should be able to access it from wherever you intend to run this script, if the script is not running on the same machine as dump1090.
@@ -50,3 +52,9 @@ To run it for the long term, I suggest running in in the background with nohup a
 ```
 nohup python3 adsb-data-collector.py &
 ```
+
+### About Logging
+The script supports logging to a file using the standard Python logging package. It is disabled by default and can be enabled from the *config.py* file. Please see the config file on how to enabled it and set the other parameters. The files are rotated such that a new file is created at midnight and the old file is renamed with the date stamp. You can configure how may days of old files you want to keep.
+
+### About Pushover Notifications
+The script also supports sending log messages as Pushover notifications. So you can set it up to notify you of errors or failures. The feature is disabled by default. To enabled it, please download the *LogPushoverHandler* from [here](https://github.com/dbsoft42/LogPushoverHandler) and place the *LogPushoverHandler.py* file in the same directory as *adsb-data-collector.py*. Then go to *config.py* and enable the feature. I recommend you keep the log level to *logging.ERROR* or *logging.CRITICAL* for the Pushover notifications.

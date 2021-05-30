@@ -2,3 +2,4 @@ __pycache__
 config.py
 test/
 nohup.out
+LogPushoverHandler.py

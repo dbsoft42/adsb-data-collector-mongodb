@@ -12,10 +12,10 @@ from config import config
 messages = {}
 
 def log_setup():
-    log_file = join(config['logging']['log_dir'], config['logging']['log_file_name'])
     logger = logging.getLogger(__name__)
     logger.setLevel(config['logging']['log_level'])
     if config['logging']['enabled']:
+        log_file = join(config['logging']['log_dir'], config['logging']['log_file_name'])
         logging_file_handler = logging.handlers.TimedRotatingFileHandler(
                                                         filename=log_file,
                                                         when='midnight',
@@ -24,6 +24,15 @@ def log_setup():
         logging_file_handler.setLevel(config['logging']['log_level'])
         logging_file_handler.setFormatter(logging.Formatter(config['logging']['log_format']))
         logger.addHandler(logging_file_handler)
+    if config['pushover']['enabled']:
+        from LogPushoverHandler import LogPushoverHandler
+        pushover_handler = LogPushoverHandler(
+                                                token=config['pushover']['token'],
+                                                user=config['pushover']['user']
+                                                )
+        pushover_handler.setLevel(config['pushover']['log_level'])
+        pushover_handler.setFormatter(logging.Formatter(config['pushover']['log_format']))
+        logger.addHandler(pushover_handler)
     return logger
 
 async def cleanup(logger):

@@ -72,3 +72,18 @@ config['logging'] =     {
                         # Max number of old logs that will be kept
                         'log_file_hist_count':  7
                         }
+
+# This set of parameters are to be used if you want to configure Pushover notifcations.
+# If not , just leave 'enabled' as False.
+config['pushover'] =    {
+                        # To enable, set to True (with capitlized T)
+                        'enabled':      False,
+                        # Your Pushover user
+                        'user':         'your Pushover user string',
+                        # Your Pushover app token
+                        'token':        'your Pushover app token',
+                        # Log level
+                        'log_level':    logging.CRITICAL,
+                        # Log format
+                        'log_format':   'ADS-B MongoDB feeder had an error\n%(message)s'
+                        }
