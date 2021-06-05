@@ -2,6 +2,8 @@
 # The MongoDB connection details and the dump1090 URL are the ones you really need to look at.
 # The rest can be left at the defaults to start with.
 
+import logging # Ignore this line
+
 config = {} # Ignore this line
 
 # MongoDB connection details (don't miss the username and password):
