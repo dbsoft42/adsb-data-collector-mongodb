@@ -144,7 +144,15 @@ async def process_message(db, logger, message):
                 if res.modified_count > 0:
                     logger.info(f"Updated 'last seen' for flight {status['flight']} - {status['hex']}")
         # Create status record if some basic location fields are available
-        if 'lat' in status or 'alt_baro' in status or 'alt_geom' in status:
+        if ('lat' in status and 'lon' in status) or 'alt_baro' in status or 'alt_geom' in status:
+            # Build GeoJSON object for position (lat-lon) if available
+            if 'lat' in status and 'lon' in status:
+                status['position'] = {
+                                        'type': 'Point',
+                                        'coordinates': [status['lon'], status['lat']]
+                                    }
+                del status['lat']
+                del status['lon']
             res = await db.status.insert_one(status)
             if res.acknowledged:
                 logger.info(f"Inserted 'status' document for {status['hex']}")
