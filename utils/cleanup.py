@@ -15,10 +15,6 @@ sec_range = (45,59)
 from pymongo import MongoClient
 from config import config
 
-# Documents whose timestamps have seconds falling within this range (inclusive of bounds)
-# are to be deleted
-sec_range = (45,59)
-
 batch_size = 50000
 
 mdb = MongoClient(config['db']['mongodb_conn_str'])
