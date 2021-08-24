@@ -63,6 +63,7 @@ async def process_dataset(db, logger, dataset):
     '''
     # Loop through each item of the aircraft list - we call them messages
     logger.info('Processing dataset')
+    tasks = []
     for message in dataset['aircraft']:
         aircraft = message['hex']
         if aircraft not in messages:
@@ -89,8 +90,9 @@ async def process_dataset(db, logger, dataset):
         if messages[aircraft]['status'] != old_status:
             messages[aircraft]['processed'] = False
             messages[aircraft]['time'] = datetime.fromtimestamp(dataset['now'])
-        asyncio.create_task(process_message(db, logger, messages[aircraft]))
-    logger.info('Completed processing dataset - background DB ops started')
+        tasks.append(asyncio.create_task(process_message(db, logger, messages[aircraft])))
+    await asyncio.gather(*tasks)
+    logger.info('Completed processing dataset')
 
 async def process_message(db, logger, message):
     '''Process given message into DB records as needed'''
@@ -110,8 +112,12 @@ async def process_message(db, logger, message):
                 logger.error(f"Aircraft document insertion for {status['hex']} was not acknowledged")
                 raise errors.InvalidOperation
         else:
-            await db.aircraft.update_one({'hex':status['hex']}, {'$set':{'last seen':status['time']}})
-            logger.info(f"Updated 'last seen' for aircraft {status['hex']}")
+            res = await db.aircraft.update_one({'hex':status['hex']}, {'$set':{'last seen':status['time']}})
+            if res.acknowledged:
+                logger.info(f"Updated 'last seen' for aircraft {status['hex']}")
+            else:
+                logger.error(f"Aircraft document updation for {status['hex']} was not acknowledged")
+                raise errors.InvalidOperation
         # If flight available
         if (
             'flight' in status
@@ -141,8 +147,11 @@ async def process_message(db, logger, message):
                                                         }
                                                 }
                                             )
-                if res.modified_count > 0:
+                if res.acknowledged:
                     logger.info(f"Updated 'last seen' for flight {status['flight']} - {status['hex']}")
+                else:
+                    logger.error(f"Flight document updation for {status['flight']} - {status['hex']} was not acknowledged")
+                    raise errors.InvalidOperation
         # Create status record if some basic location fields are available
         if ('lat' in status and 'lon' in status) or 'alt_baro' in status or 'alt_geom' in status:
             # Build GeoJSON object for position (lat-lon) if available
