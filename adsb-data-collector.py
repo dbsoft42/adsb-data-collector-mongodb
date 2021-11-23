@@ -162,6 +162,14 @@ async def process_message(db, logger, message):
                                     }
                 del status['lat']
                 del status['lon']
+            # Cleanup status if limited status is requested
+            if config['limited_status']:
+                status_del_list = []
+                for key in status:
+                    if key not in config['limited_status_allowed_list'] and key not in ['hex', 'flight', 'time']:
+                        status_del_list.append(key)
+                for key in status_del_list:
+                    del status[key]
             res = await db.status.insert_one(status)
             if res.acknowledged:
                 logger.info(f"Inserted 'status' document for {status['hex']}")

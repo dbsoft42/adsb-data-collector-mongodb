@@ -53,6 +53,12 @@ config['excluded_fields'] = ['messages', 'seen', 'seen_pos',]
 # A successful operation will reset the counter.
 config['max_consecutive_http_errors'] = 10
 
+# If the following is set to True, only a limited set of data will be kep in the
+# status documents. This is to save space on MongoDB.
+# Only the data points listed in limited_status_allowed_list will be saved.
+config['limited_status'] = True
+config['limited_status_allowed_list'] = ['position', 'alt_baro', 'gs', 'track', 'squawk', 'track_rate', 'roll_rate', 'baro_rate', 'mach', 'ias']
+
 # Configure the following parameters for logging.
 # The process can write to log files in the directory speified below.
 # A new log file will be created at midnight every day and the old file will be
