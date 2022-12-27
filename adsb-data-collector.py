@@ -227,7 +227,19 @@ async def main():
                     continue
                 logger.debug(f'Dataset received from dump1090:\n{dataset}')
                 logger.info(f"Got {len(dataset['aircraft'])} aircraft detail messages from dump1090")
-                await process_dataset(db, logger, dataset)
+                try:
+                    await process_dataset(db, logger, dataset)
+                    max_consecutive_http_errors = config['max_consecutive_http_errors']
+                except errors.InvalidOperation as exc:
+                    logger.debug(f"Possible MongoDB error, remaining allowance: {max_consecutive_http_errors}")
+                    logger.exception('Something went wrong while processing dataset')
+                    if max_consecutive_http_errors == 0:
+                        logger.critical('Maximum consecutive errors exceeded')
+                        raise exc
+                    max_consecutive_http_errors -= 1
+                    await asyncio.sleep(config['source_poll_interval'])
+                    continue
+                    
                 await asyncio.sleep(config['source_poll_interval'])
     except Exception as exc:
         logger.exception('Something went wrong')
