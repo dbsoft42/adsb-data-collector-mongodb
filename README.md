@@ -37,7 +37,7 @@ cp config_template.py config.py
 ```
 Edit *config.py* in your favourite text editor and change the following parameters.
 * `mongodb_conn_str` - The MongoDB connection string. If you are using MongoDB Atlas, you can get this by logging in to Atlas, going to your cluster and clicking on the connect button. Get the one for Python.
-* `database_name` - The name of the database in MongoDB that you will use to store the ADS-B data. I recommend having a dedicated database for this not using it for any other data.
+* `database_name` - The name of the database in MongoDB that you will use to store the ADS-B data. I recommend having a dedicated database for this and not using it for any other data.
 * `dump1090_url` - This is the dump1090 URL which serves the *aircraft.json* file. Typically this will be in the form of `http://hostname/dump1090/data/aircraft.json` where *hostname* is the host name or IP address of the machine where *dump1090* is running. If you will be running this script on the same machine where dump1090 is running, you can leave it as *localhost*.
 
 The file has more parameters for fine-tuning various operations. You can leave these as the defaults or tune them if you like. The file has comments describing in more detail what each parameter is used for.
@@ -54,7 +54,7 @@ nohup python3 adsb-data-collector.py &
 ```
 
 ### About Logging
-The script supports logging to a file using the standard Python logging package. It is disabled by default and can be enabled from the *config.py* file. Please see the config file on how to enabled it and set the other parameters. The files are rotated such that a new file is created at midnight and the old file is renamed with the date stamp. You can configure how may days of old files you want to keep.
+The script supports logging to a file using the standard Python logging package. It is disabled by default and can be enabled from the *config.py* file. Please see the config file on how to enable it and set the other parameters. The files are rotated such that a new file is created at midnight and the old file is renamed with the date stamp. You can configure how may days of old files you want to keep.
 
 ### About Pushover Notifications
-The script also supports sending log messages as Pushover notifications. So you can set it up to notify you of errors or failures. The feature is disabled by default. To enabled it, please download the *LogPushoverHandler* from [here](https://github.com/dbsoft42/LogPushoverHandler) and place the *LogPushoverHandler.py* file in the same directory as *adsb-data-collector.py*. Then go to *config.py* and enable the feature. I recommend you keep the log level to *logging.ERROR* or *logging.CRITICAL* for the Pushover notifications.
+The script also supports sending log messages as Pushover notifications. So you can set it up to notify you of errors or failures. The feature is disabled by default. To enable it, please download the *LogPushoverHandler* from [here](https://github.com/dbsoft42/LogPushoverHandler) and place the *LogPushoverHandler.py* file in the same directory as *adsb-data-collector.py*. Then go to *config.py* and enable the feature. I recommend you keep the log level to *logging.ERROR* or *logging.CRITICAL* for the Pushover notifications.
