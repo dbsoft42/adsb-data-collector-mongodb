@@ -35,7 +35,7 @@ def log_setup():
         logger.addHandler(pushover_handler)
     return logger
 
-async def cleanup(logger):
+async def cleanup(db, logger):
     '''
     Trims the messages dict that grows over time
     based on max age defined in config dict
@@ -53,6 +53,15 @@ async def cleanup(logger):
         for key in del_list:
             del messages[key]
         logger.info(f'Cleanup: Messages dict size is now {len(messages)}')
+        logger.info(f"Cleanup: Deleting status docs older than {config['max_status_age_days']} days")
+        res = await db.aircraft.delete_many({'time':{
+            '$lt': now - relativedelta(days=config['max_status_age_days'])}
+        })
+        if res.acknowledged:
+            logger.info(f'Cleanup: Deleted {res.deleted_count} status docs')
+        else:
+            logger.error(f'Cleanup: Error in status docs deletion')
+            raise errors.InvalidOperation
         logger.info('Cleanup: complete')
         await asyncio.sleep(config['cleanup_run_interval'])
 
@@ -207,7 +216,7 @@ async def main():
         db = mdb[config['db']['database_name']]
 
         # Create and start a separate task for the cleanup function
-        asyncio.create_task(cleanup(logger))
+        asyncio.create_task(cleanup(db, logger))
 
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=config['http_timeout'])) as http_session:
             while True:
@@ -230,15 +239,13 @@ async def main():
                 try:
                     await process_dataset(db, logger, dataset)
                     max_consecutive_http_errors = config['max_consecutive_http_errors']
-                except errors.InvalidOperation as exc:
+                except Exception as exc:
                     logger.debug(f"Possible MongoDB error, remaining allowance: {max_consecutive_http_errors}")
                     logger.exception('Something went wrong while processing dataset')
                     if max_consecutive_http_errors == 0:
                         logger.critical('Maximum consecutive errors exceeded')
                         raise exc
                     max_consecutive_http_errors -= 1
-                    await asyncio.sleep(config['source_poll_interval'])
-                    continue
                     
                 await asyncio.sleep(config['source_poll_interval'])
     except Exception as exc:
